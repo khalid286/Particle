@@ -10,7 +10,8 @@ using namespace std;
 // Constructor to initialize the engine
 Engine::Engine() {
     // Create the render window with a custom resolution or desktop mode
-    m_Window.create(VideoMode::getDesktopMode(), "Particle Generator", Style::Default);
+    VideoMode vm(1920,1080);
+    m_Window.create(vm, "Particle Generator", Style::Default);
     //Load the font
     if (!m_font.loadFromFile("Font.ttf")) {
         cout << "Error loading font!" << endl;
