@@ -18,6 +18,12 @@ private:
 	void input();
 	void update(float dtAsSeconds);
 	void draw();
+	Vector2i m_lastParticlePosition = Vector2i(-1, -1);
+	int m_particleCount = 0;
+	bool m_showCount = false;
+	Text m_particleCountText;
+	Font m_font;
+
 
 public:
 	// The Engine constructor
