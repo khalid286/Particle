@@ -10,8 +10,19 @@ using namespace std;
 // Constructor to initialize the engine
 Engine::Engine() {
     // Create the render window with a custom resolution or desktop mode
-    m_Window.create(VideoMode::getDesktopMode(), "Particle Generator", Style::Fullscreen);
+    m_Window.create(VideoMode::getDesktopMode(), "Particle Generator", Style::Default);
+    //Load the font
+    if (!m_font.loadFromFile("Font.ttf")) {
+        cout << "Error loading font!" << endl;
+    }
+    m_particleCountText.setFont(m_font);
+    m_particleCountText.setCharacterSize(100);
+    m_particleCountText.setFillColor(Color::White);
+    m_particleCountText.setPosition(200, 200);
+
 }
+
+
 
 // Main run function
 void Engine::run() {
@@ -41,12 +52,45 @@ void Engine::input() {
             m_Window.close();
         }
 
+        // Initial click event to generate a particle
         if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+            m_showCount = false;  // Hide the particle count when clicking
+            m_particleCount = 0;  // Reset particle count
+
             Vector2i mousePos = Mouse::getPosition(m_Window);
+
             for (int i = 0; i < 5; i++) {
                 int numPoints = rand() % 26 + 25;
                 m_particles.emplace_back(m_Window, numPoints, mousePos);
+                m_particleCount++;
             }
+
+            m_lastParticlePosition = mousePos;
+        }
+
+        // Mouse released event
+        if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left) {
+            m_showCount = true;  // Show the particle count when releasing the mouse
+            m_lastParticlePosition = Vector2i(-1, -1);
+        }
+    }
+
+    // Continuous particle generation while holding down the left mouse button
+    if (Mouse::isButtonPressed(Mouse::Left)) {
+        Vector2i mousePos = Mouse::getPosition(m_Window);
+
+        // Check for sufficient movement to prevent excessive particle creation
+        if (m_lastParticlePosition == Vector2i(-1, -1) ||
+            abs(mousePos.x - m_lastParticlePosition.x) > 5 ||
+            abs(mousePos.y - m_lastParticlePosition.y) > 5) {
+
+            for (int i = 0; i < 3; i++) {
+                int numPoints = rand() % 26 + 25;
+                m_particles.emplace_back(m_Window, numPoints, mousePos);
+                m_particleCount++;
+            }
+
+            m_lastParticlePosition = mousePos;
         }
     }
 }
@@ -70,6 +114,12 @@ void Engine::draw() {
 
     for (const auto& particle : m_particles) {
         m_Window.draw(particle);
+    }
+
+    // Display particle count only when mouse is released
+    if (m_showCount) {
+        m_particleCountText.setString("Particles Created: " + to_string(m_particleCount));
+        m_Window.draw(m_particleCountText);
     }
 
     m_Window.display();
